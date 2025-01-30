@@ -1,0 +1,663 @@
+---
+title: "rgplates"
+subtitle: "<i>R interface for the GPlates Web Service and the GPlates Application</i>"
+author: "<strong>Ádám T. Kocsis</strong>, John Cannon, Xiaodong Qin, Dietmar Müller, Nussaibah B. Raja, Simon Williams, Sabin Zahirovic, Elizabeth M. Dowding"
+width: 1920
+css: styles.css
+height: 1080
+institute: "FAU GeoZentrum Nordbayern, EarthByte Group - University of Sydney, University of Tasmania"
+bibliography: '/mnt/sky/Dropbox/Libraries/- MetaData/library.bib'
+format:
+  revealjs:
+    embed-resources: true
+    toc: false
+    toc-depth: 1
+    toc-title: "Contents"
+    transition: fade 
+    theme: default
+    logo: /mnt/sky/Dropbox/Software/rgplates/assets/logo/rgplates_gplates_suite_banner-01.png
+    footer: "<code>rgplates</code> - Palaeoverse lecture series (2025-01-30)"
+    preview-links: auto
+    chalkboard: false
+title-slide-attributes:
+  data-background-image: "images/cover2.png"
+  data-background-size: contain
+  data-background-opacity: "0.3"
+graphics: "/mnt/sky/Dropbox/Graphics/"
+---
+
+
+```{r, include=FALSE}
+library(rgplates)
+```
+
+## Overview
+
+:::: {.columns}
+::: {.column width="70%"}
+
+1. Introduction: why is this necessary?  
+2. Feature set: what can you do?  
+3. Implementation: some details  
+   - Overview  
+   - Project history  
+   - Resources  
+4. Practical demonstration  
+
+
+:::
+::: {.column width="30%"}
+
+![](/mnt/sky/Dropbox/Software/rgplates/assets/logo/logo.png)
+
+:::
+::::
+
+### Goal: an overview of the project and its utility in the paleoecological R toolset.
+
+# 1. Introduction
+
+## Paleo has gone into 'space'
+
+:::: {.columns}
+::: {.column width="50%"}
+- First data compilations were focusing on stratigraphy
+- Dominant research direction (since 2000s)
+- Because we now know where fossils are
+
+![](images/paleo-space.webp)
+
+:::
+
+::: {.column width="20%"}
+
+:::
+
+
+::: {.column width="30%"}
+
+![]({{< meta graphics >}}Diagrams/Turnover and Ranges/gappiness.svg){width="500"}
+
+![]({{< meta graphics >}}Captures/pbdb_jurassic.png){width="600"}
+
+
+:::
+::::
+
+
+## In paleoecological research...
+
+:::: {.columns}
+::: {.column width="50%"}
+
+### Spatial structure of sampling 
+
+![]({{< meta graphics >}}Papers/close2020spatial_fig_s12.png){width="400"}
+
+@close2020spatial
+
+:::
+
+::: {.column width="50%"}
+
+### Latitudinal gradients 
+
+![]({{< meta graphics >}}Papers/zhang_2022_fig_2.png){width="700"}
+
+@Zhang2022
+
+:::
+::::
+
+
+## In paleoecological research
+
+:::: {.columns}
+::: {.column width="50%"}
+
+### Niche modeling
+
+![]({{< meta graphics >}}Papers/saupe_2019_birds_fig2.png){width="600"}
+
+@saupe2019climatic
+
+:::
+
+::: {.column width="50%"}
+
+### Range assessment 
+
+![]({{< meta graphics >}}Papers/darroch2022integrating_fig_IB.jpg){width="600"}
+
+@darroch2022integrating
+
+:::
+::::
+
+## In paleoecologcial research
+
+:::: {.columns}
+::: {.column width="50%"}
+
+### Understanding extinctions 
+
+![]({{< meta graphics >}}Papers/penn_et_al_2018_fig_4.png)
+
+@penn2018permian
+
+:::
+
+::: {.column width="50%"}
+
+### Bioregionalization 
+
+![]({{< meta graphics >}}Papers/Mebio, 2018/cre2.png)
+
+@kocsis2018biogeographical
+
+:::
+::::
+
+
+## Paleogeographic reconstructions 
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Most such research use reconstruction data products →
+- DEMs, GCMs, ESMs (e.g. @scotese2018paleodem, @valdes2017bridge)
+- All are built on **tectonic models**
+
+![](images/SeafloorFabric_AgeGrid.png){width="800"}  
+
+:::
+
+::: {.column width="50%"}
+ 
+![](material/export/paleodem.png)  
+
+![](images/055.gif)  
+
+:::
+::::
+
+
+## Tectonic models disagree... 
+
+:::: {.columns}
+::: {.column width="100%"}
+
+... the deeper we go in time.
+
+![]({{< meta graphics >}}Papers/buffan2024mind_fig3a.png){width="80%"}
+
+@buffan2023uncertainty
+
+:::
+
+::::
+
+## Tectonic calculations in the R toolchain
+
+:::: {.columns}
+
+::: {.column width="70%"}
+- How does this *tectonic model* variable create error in ecological results? 
+- Documentation of tectonic model use can be cryptic. Redo rotations yourself?
+- High-level, **easy-to-use**, fully flexible and robust solution
+- Abstraction allows higher complexity! 
+
+**Integrate tectonic reconstruction into all analytical pipelines**
+
+![](images/gplates_models.png){width='60%'}
+
+:::
+
+::: {.column width="30%"}
+
+
+![]({{< meta graphics >}}Logos/RlogoNew.png)  
+
+![](images/GPlately_Main_logo.png)
+:::
+::::
+
+# 2. Feature set
+
+## Make maps: exploration of tectonic models
+
+:::: {.columns}
+::: {.column width="60%"}
+
+- Use a tectonic model: **<code>reconstruct</code> feature collections**
+
+
+![](images/pretty.png)
+
+Visualize spatial distribution of records
+
+:::
+
+::: {.column width="40%"}
+
+![](images/me-mu400_unified.png)
+
+Compare tectonic models (Devonian)
+
+![](images/product.png)
+
+Use derived data products (PALEOMAP, Campanian)
+
+
+:::
+::::
+
+## Pre-defined shapes: `static_polygons`
+
+:::: {.columns}
+::: {.column width="40%"}
+
+- Most basic components of the model
+- Vary depending on the model (e.g. oceanic plates included?)
+
+:::
+
+::: {.column width="60%"}
+
+### Example
+
+```{r, echo=TRUE, eval=FALSE}
+plates <- reconstruct("static_polygons", age=65, model="MERDITH2021")
+plot(plates$geometry, col="gray", border="black")
+```
+
+![](material/export/basics/static_polygons.png)
+
+
+:::
+::::
+
+
+## Pre-defined elements: `coastlines` (GWS)
+
+
+:::: {.columns}
+::: {.column width="40%"}
+
+- NOT paleocoastlines!
+- Modern landmassess partitioned with the `static_polygons`
+- Useful for orientation, i.e. where are things on a map?
+:::
+
+::: {.column width="60%"}
+
+### Example
+
+```{r, echo=TRUE, eval=FALSE}
+coast <- reconstruct("coastlines", age=65, model="MERDITH2021")
+plot(coast$geometry, col="gray", border="black")
+```
+
+![](material/export/basics/coastlines.png)
+
+
+:::
+::::
+
+
+## Paleocoordinates of present-day localities
+
+:::: {.columns}
+::: {.column width="55%"}
+
+- **input**: 2-column matrix of present-day geographic coordinates (longitude/latitude)
+- The workhorse of `rgplates`
+- Works because of partitioning polygons (default: `static_polygons`)
+
+
+```{r, eval=TRUE, echo=TRUE}
+# longitude-latitude coordinates
+sydney<- c(151.17, -33.85)
+montreal<- c(-73.61, 45.52)
+
+# 2-column matrix 
+x <- rbind(sydney, montreal)
+colnames(x) <- c("long", "lat")
+x
+```
+
+```{r, eval=TRUE, echo=TRUE}
+reconstruct(x, age=106.85, model="MERDITH2021")
+```
+
+:::
+
+::: {.column width="45%"}
+
+![](../export/albian_bivalves_present.png)
+
+![](images/down.png){width="50"}
+
+![](images/cret_biv.png)
+
+:::
+::::
+
+
+## Paleocoordinate transformation (GWS)
+
+:::: {.columns}
+::: {.column width="45%"}
+
+- Using paleocoordinates as input, i.e. those derived from spatial calculations in past space 
+- Tracing evolution ares that have relevance (e.g. sampling)
+- Spatial simulations
+
+```{r, echo=TRUE, eval=FALSE}
+randomPoints65 <- reconstruct(randomPoints107,
+	from=107, age=65)
+```
+
+:::
+
+::: {.column width="10%"}
+
+:::
+
+::: {.column width="45%"}
+
+![](material/export/pc_input.png)
+
+![](images/down.png){width="30"}
+
+![](material/export/pc_input65.png)
+
+:::
+::::
+
+
+## Reconstruction of complex spatials - *In development*
+
+:::: {.columns}
+::: {.column width="50%"}
+
+### Vector spatials (`sf`)
+
+![](material/export/sf_input65.png)
+
+Present-day 10-degree graticules reconstructed (MERDITH2021 at 65Ma)
+
+- Polygon topology issues (lines work)
+
+:::
+
+::: {.column width="50%"}
+
+### Raster spatials (`terra`)
+
+![](material/export/retopo65.png)
+
+Reconstructed position of present-day topography (ETOPO1, MERDITH2021 at 65Ma)
+
+- GWS (relies in paleocoord. input) 
+
+:::
+::::
+
+## More to come! 
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Joint development since autumn 2024, `rgplates` is now part of the GPlates suite
+- Current feature set prioritized for ecological analyses, but there is lots more, e.g. **velocity calculations** →
+
+```{r, echo=TRUE, eval=FALSE}
+velo <- velocities(age=65, model="MERDITH2021", 
+  output="SpatRaster")
+```
+
+![](images/Elizabeth-Dowding-240x320.jpg){width='400'}
+
+Liz Dowding
+
+:::
+
+::: {.column width="50%"}
+
+![](material/export/velo65.png)
+
+:::
+::::
+
+# 3. Implementation details 
+
+## Major modules 
+
+:::: {.columns}
+::: {.column width="60%"}
+
+- Two major modules: **online** and **offline**, pros and cons for both
+- Shared interface: primary differece is how the tectonic model is specified:
+  - **online**: `character` string (GWS)
+  - **offline**: `platemodel` S4 class (GPlates file links)
+
+:::
+
+::: {.column width="40%"}
+
+![](/mnt/sky/Dropbox/Software/rgplates/paper/doc/figs/dependencies.png)
+
+:::
+::::
+
+## History: first steps
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Started as part of the `chronosphere` project (2018)
+- Original purpose: provide easier interface to working with deep-time climate model data
+- We need paleocoordinates for the climate models... manually? How? 
+
+:::: {.columns}
+::: {.column width="50%"}
+
+![]({{< meta graphics >}}People/raja-schoob.jpg){height='300'}
+
+**Nussaïbah**: Use the *GPlates Web Service*!
+:::
+
+::: {.column width="50%"}
+
+![](images/PhotoOfMe.jpg){height='300'}
+
+**Adam**: We should use *pyGPlates*!
+:::
+::::
+
+:::
+
+::: {.column width="50%"}
+
+![]({{< meta graphics >}}Logos/chronosphere_500x500.png)
+
+Versioned data access API
+
+:::
+::::
+
+## GWS, really? Via the internet?!
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Multiple attempts were made to build R tools on the GWS, none were advanced enough to be used as a dependency. 
+  - **Reproducibility?!** - People who struggle with R will not like Docker...
+- No control over model version
+- Reconstructing large amounts of data, e.g. the entire **Paleobiology Database** was not possible 
+ 
+![](/mnt/sky/Dropbox/Graphics/Logos/PBDB2014.png){width='400'}
+ 
+:::
+
+::: {.column width="50%"}
+![](images/gws.png)
+:::
+::::
+
+## Something faster and local 
+
+:::: {.columns}
+::: {.column width="50%"}
+- It never became easy to install an R package with a reliable, automatic instance of **pyGPlates** dependency
+- **John Cannon** suggested that there is an old, abandoned console interface to the **GPlates Application**
+  - 1. R exports files to the hard drive
+  - 2. GPlates does its magic
+  - 3. R reads stuff back
+- Access files? 
+:::
+
+::: {.column width="50%"}
+![](images/gplates_console.png)
+
+:::
+::::
+
+## The modularization of the `chronosphere`
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- All this was part of it, which became a textbook case of [feature creep](https://medium.com/43-design-studio/what-is-feature-creep-and-how-to-avoid-it-df557f47e984)
+- Managable until:
+  - R spatial evolution (most code needed to be rewritten)
+  - Nuss got a data science job
+  - Adam became a faculty member and fell for UNIX 
+
+<span style="color:red">Tectonic modelling, R GPlates API ⟹ <code>rgplates</code></span>
+
+![]({{< meta graphics >}}Papers/unix_philosophy.png)
+
+:::
+
+::: {.column width="50%"}
+
+![]({{< meta graphics >}}Concepts/feature_creep.png)  
+
+![](images/spatial_evolution.png){width="500"}
+
+:::
+::::
+
+
+## Current feature coverage (`v0.5.0` - not complete!)
+
+:::: {.columns}
+::: {.column width="100%"}
+
+![](images/feature_coverage.png)
+
+Working with **Xiaodong Qin** and **John Cannon** to equalize the interface.
+
+:::
+
+::::
+
+
+
+## Resources and learning!
+
+:::: {.columns}
+::: {.column width="100%"}
+
+- Tutorials at <code>rgplates'</code> website: <https://gplates.github.io/rgplates/>
+- Workshop material from PalAss 2024: [adamkocsis/palaeogeography_palass2024](https://github.com/adamkocsis/palaeogeography_palass2024)
+- PhD candidates: [Analytical Paleo Workshop/School 2025](https://www.paleosynthesis.nat.fau.de/index.php/science-schools/) - <span style="color:red"> Deadline: February 13!</span>
+- Undergraduates: [Paleobiology Master at FAU](https://palaeobiology.nat.fau.de/)
+
+:::: {.columns}
+::: {.column width="60%"}
+
+![](/mnt/sky/Dropbox/Software/rgplates/assets/ads/dietmar_linkedin2/export/temperature.png)
+
+:::
+
+::: {.column width="40%"}
+![](file:///mnt/sky/Dropbox/Web/Evolv-ED/images/logos/symbol_light.png)
+
+:::
+::::
+
+
+:::
+::::
+
+# 4. Practical demonstration
+
+Files accessible here: [adamkocsis/rgplates_palaeoverse](https://github.com/adamkocsis/rgplates_palaeoverse)
+
+
+
+## Thanks!
+
+:::: {.columns}
+::: {.column width="60%"}
+- Hundreds of users, especially who provided feedback and continue to support!
+- Deutsche Forschungsgemeinschaft: TERSANE SPex, Ko 5382/2-1
+
+:::
+
+::: {.column width="40%"}
+![]({{< meta graphics >}}Clipart/happy.svg){width=100%}  
+:::
+::::
+
+:::: {.columns}
+::: {.column width="20%"}
+
+![]({{< meta graphics >}}Logos/FAU.png){width='250'}
+
+![]({{< meta graphics >}}Logos/GeoZentrum.png){width='250'}
+
+:::
+
+::: {.column width="20%"}
+
+![]({{< meta graphics >}}Logos/dfg.jpg){width='250'}
+
+![]({{< meta graphics >}}Logos/logo-proj.png){width='250'}
+
+:::
+::: {.column width="20%"}
+
+![]({{< meta graphics >}}Logos/github.png){width='250'}
+
+![]({{< meta graphics >}}Logos/New_GPlates_Logo.png){width='250'}
+
+:::
+::: {.column width="20%"}
+
+![]({{< meta graphics >}}Logos/RlogoNew.png){width='250'}
+
+![]({{< meta graphics >}}Logos/sf.gif){width='250'}
+
+
+:::
+::: {.column width="20%"}
+
+![]({{< meta graphics >}}Logos/earthbyte.png){width='250'}
+
+
+
+:::
+::::
+
+
+
+
+
+## References
+
+
+

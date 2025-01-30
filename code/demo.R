@@ -9,9 +9,11 @@
 # install.packages(c("geojson", "httr2"))
 
 # attachment of rgplates with sf
+# rgplates functions without namespace indication
 library(rgplates) # 0.5.0
 
 # additional packages for the demo - installable from the CRAN!
+# with namespace indication: e.g. chronosphere::fetch()
 # install.packages(("icosa", "chronosphere"))
 library(icosa)
 library(chronosphere)
@@ -22,6 +24,7 @@ library(chronosphere)
 # A. Built-ins
 
 # Default model: MERDITH2021 - present-day, partitioning polygons
+# Naming convention: no model name = default model
 plates0 <- reconstruct("static_polygons", age=0)
 plates0
 
