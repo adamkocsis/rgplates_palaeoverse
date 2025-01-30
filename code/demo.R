@@ -1,4 +1,4 @@
-# Demonstration for the Palaeoverse lecture
+# Demonstration of rgplates for the Palaeoverse lecture
 # 2025-01-30
 # Ádám T. Kocsis
 
@@ -9,7 +9,7 @@
 # install.packages(c("geojson", "httr2"))
 
 # attachment of rgplates with sf
-library(rgplates)
+library(rgplates) # 0.5.0
 
 # additional packages for the demo - installable from the CRAN!
 # install.packages(("icosa", "chronosphere"))

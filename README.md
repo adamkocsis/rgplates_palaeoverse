@@ -6,3 +6,16 @@ CC-BY 4.0 (cite `rgplates`!)
 
 All relevant information can be found in the `code/demo.R` file. Have fun!
 
+
+### Used pacakges
+
+| name           | version | CRAN |
+|----------------|---------|------|
+| `rgplates`     | 0.5.0   | yes  |
+| `icosa`        | 0.11.1  | yes  |
+| `sf`           | 1.0-19  | yes  |
+| `terra`        | 1.8-15  | yes  |
+| `geojsonsf`    | 2.0.3   | yes  |
+| `httr2`        | 1.1.0   | yes  |
+| `chronosphere` | 0.6.1   | yes  |
+	
