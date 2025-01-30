@@ -19,4 +19,7 @@ CC-BY 4.0 (cite `rgplates`!)
 | `geojsonsf`    | 2.0.3   | yes  |
 | `httr2`        | 1.1.0   | yes  |
 | `chronosphere` | 0.6.1   | yes  |
+|----------------|---------|------|
+| GPlates        | 2.5.0   |      |
+| GWS            | 1.0.0   |      |
 	
