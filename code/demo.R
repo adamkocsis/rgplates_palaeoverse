@@ -91,10 +91,12 @@ montreal<- c(-73.61, 45.52)
 
 # all cities in a single matrix
 cities<- rbind(sydney, montreal)
+cities
 
 # Using the default MERDITH2021 model
 cities107 <- reconstruct( cities, age = 107)
 # returns longitude-latitude data
+cities107
 
 # using plain longlat coordinates
 plot(coast107$geometry, col="gray", border=NA)
@@ -250,16 +252,16 @@ mids <- (bounds[2:length(bounds)-1] + bounds[2:length(bounds)]) /2
 names(mids) <- c("Barremian", "Aptian", "Albian")
 mids
 
+# reconstruct the coastline feature with a model, default: enumerate=TRUE
+coastMulti <- reconstruct("coastlines", age=mids, model=merdith)
+str(coastMulti, 1)
+
 # add the target age as a column
 colls$map <- mids[colls$time_contain]
 table(colls$map)
 
 # get rid of data coming from not this interval
 useColls <- colls[!is.na(colls$map), ]
-
-# reconstruct the coastline feature with a model, default: enumerate=TRUE
-coastMulti <- reconstruct("coastlines", age=mids, model=merdith)
-str(coastMulti, 1)
 
 # reconstruct - coordinate - target age pairs
 usePaleo <- reconstruct(useColls[, c("lng", "lat")], age=useColls$map, model=merdith, enumerate=FALSE)
