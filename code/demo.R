@@ -5,13 +5,14 @@
 # package installation from CRAN
 # install.packages("rgplates")
 
-# suggested packages
+# suggested packages from CRAN
 # install.packages(c("geojson", "httr2"))
 
 # attachment of rgplates with sf
 library(rgplates)
 
-# additional packages for the demo
+# additional packages for the demo - installable from the CRAN!
+# install.packages(("icosa", "chronosphere"))
 library(icosa)
 library(chronosphere)
 
@@ -59,15 +60,26 @@ legend("left", bty="n", legend=c("MERDITH2021", "TorsvikCocks2017"), border=NA,
 # override internal checking
 coast107Cao <- reconstruct("coastlines", age=107, model="CAO2024") # produces ERROR!
 coast107Cao <- reconstruct("coastlines", age=107, model="CAO2024", check=FALSE)
-plot(coastCao$geometry, col="gray90", border=NA)
+plot(coast107Cao$geometry, col="gray90", border=NA)
 
 ########################################
 # results are standard sf objects
+
+# - Projection:
 proj <- "ESRI:54009"
 
 # plotting
 coast107proj <- sf::st_transform(coast107, proj)
 plot(coast107proj$geometry, col="gray90", border=NA)
+
+# - Geometric operations
+plot(coast107$geometry, col="#AA000077", border=NA)
+
+# machine-produced data
+sf_use_s2(FALSE)
+coast107union <- sf::st_union(sf::st_make_valid(coast107))
+plot(coast107union, col="#AA000077", border=NA)
+sf_use_s2(FALSE)
 
 ########################################----------------------------------------
 # B. Point reconstruction
@@ -95,6 +107,7 @@ setwd("/mnt/sky/Dropbox/Software/rgplates/doc/palaeoverse_lecture/")
 # read in some example data
 # https://paleobiodb.org/data1.2/occs/list.csv?datainfo&base_name=Bivalvia&interval=Cretaceous&show=coords,timecompare
 pbdb <- read.csv("data/cretaceous_bivalves_2025-01-28.csv", skip=15)
+str(pbdb)
 
 # normalize collection data
 # time_contain: collections datable to the precision of one GTS global stage
@@ -110,6 +123,7 @@ nrow(albian)
 # on a present-day map
 coast <- reconstruct("coastlines", age=0)
 
+dir.create("export", showWarnings=FALSE)
 png("export/albian_bivalves_present.png", width=2000, height=1000, pointsize=24)
 	par(mar=c(0.1,0.1,0.1,0.1))
 	plot(coast$geometry, col="gray", border=NA)
@@ -121,8 +135,8 @@ albianRec <- reconstruct(albian[, c("lng", "lat")], age=107)
 str(albianRec)
 
 # visualize
-plot(plates107$geometry, col="lightgray", border="white")
-plot(coastlines107$geometry, col="darkgray", border="white", add=TRUE)
+plot(plates107$geometry, col="lightgray", border=NA)
+plot(coast107$geometry, col="darkgray", border=NA, add=TRUE)
 points(albianRec, col="red", pch=3)
 
 # there are missing values here
@@ -132,7 +146,7 @@ sum(is.na(albianRec[,"paleolat"]))
 albianRecPM <- reconstruct(albian[, c("lng", "lat")], age=107, model="PALEOMAP")
 sum(is.na(albianRecPM[,"paleolat"]))
 
-# missing values? -> plate durations
+# missing values? -> make points not inherit plate durations - DANGEROUS!
 albianRec_all <- reconstruct(albian[, c("lng", "lat")], age=107, validtime=FALSE)
 sum(is.na(albianRec_all[,"paleolat"]))
 
@@ -210,10 +224,9 @@ plot(plates107PM$geometry, col="gray")
 points(albianRecPM, col="red", pch=3)
 
 # 2B. Download platemodel from the Chronosphere
-library(chronosphere)
 merdith <- chronosphere::fetch(src="GPlates", ser="MERDITH2021", ver="1.1")
 merdith
-# many still lasck support by GPLates itself, e.g. topologies are not resolved!
+# many still lack support by GPLates itself, e.g. topologies are not resolved!
 
 # more feature collections available
 merdithPoly <- reconstruct("static_polygons", age=107, model=merdith)
@@ -253,7 +266,6 @@ usePaleo <- reconstruct(useColls[, c("lng", "lat")], age=useColls$map, model=mer
 useColls <- cbind(useColls, usePaleo)
 str(useColls)
 
-dir.create("export", showWarnings=FALSE)
 pdf("export/cret_biv.pdf", width=16, height=8)
 par(mar=c(0.1,0.1,2,0.1))
 for(i in 1:length(mids)){
@@ -271,3 +283,10 @@ for(i in 1:length(mids)){
 }
 
 dev.off()
+
+# merge back with the rest of the occurrences
+records <- merge(
+	pbdb,
+	useColls[, c("collection_no","paleolong", "paleolat", "map")],
+	by="collection_no",
+	all=TRUE)
